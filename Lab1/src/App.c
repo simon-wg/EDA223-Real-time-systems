@@ -1,38 +1,37 @@
 #include "App.h"
+#include "Input.h"
+#include "Music.h"
 #include "TinyTimber.h"
 #include "canTinyTimber.h"
-#include "music.h"
 #include "print.h"
 #include "sciTinyTimber.h"
-#include "stm32f4xx.h"
-#include <stdlib.h>
-#include <sys/param.h>
 
 extern App app;
+extern Input input;
+extern MusicPlayer musicPlayer;
 extern Can can0;
 extern Serial sci0;
 
-void receiver(App *self, int unused) {
+int receiver(App *self, int unused) {
   CANMsg msg;
   CAN_RECEIVE(&can0, &msg);
   SCI_WRITE(&sci0, "Can msg received: ");
   SCI_WRITE(&sci0, msg.buff);
+  return 0;
 }
 
-void reader(App *self, int c) {
-  SCI_WRITE(&sci0, "Rcv: \'");
-  SCI_WRITECHAR(&sci0, c);
-  SCI_WRITE(&sci0, "\'\n");
-  handleSerial(self, c);
+int reader(App *self, int c) {
+  ASYNC(self, handleSerial, c);
+  return 0;
 }
 
-void startApp(App *self, int arg) {
-  CANMsg msg;
+int startApp(App *self, int arg) {
+  // CANMsg msg;
 
   CAN_INIT(&can0);
   SCI_INIT(&sci0);
 
-  ASYNC(self, toggleDac, 0);
+  ASYNC(&musicPlayer, play, 500);
   // SCI_WRITE(&sci0, "Hello, hello...\n");
 
   // msg.msgId = 1;
@@ -45,12 +44,7 @@ void startApp(App *self, int arg) {
   // msg.buff[4] = 'o';
   // msg.buff[5] = 0;
   // CAN_SEND(&can0, &msg);
-}
-
-void toggleDac(App *self, int unused) {
-  int current = READ_REG(DAC->DHR8R2);
-  WRITE_REG(DAC->DHR8R2, 5 ^ current);
-  AFTER(USEC(500), self, toggleDac, 0);
+  return 0;
 }
 
 int main() {
@@ -60,55 +54,26 @@ int main() {
   return 0;
 }
 
-void handleSerial(App *self, int c) {
+int handleSerial(App *self, int c) {
   int n;
+  print("Rcv: '%c'\n", c);
   switch (c) {
   case 'F':
-    self->bufIndex = 0;
-    self->historyIndex = 0;
-    print("History and buffer cleared.\n");
-    break;
+    ASYNC(&input, clear, 0);
+    return 0;
   case 'e':
-    n = getInt(self);
-    self->history[2] = self->history[1];
-    self->history[1] = self->history[0];
-    self->history[0] = n;
-    self->historyIndex = MIN(self->historyIndex + 1, 3);
-    print("Entered integer %d: sum = %d, median = %d\n", self->history[0],
-          getHistorySum(self), getHistoryMedian(self));
-    break;
+    ASYNC(&input, appendInt, 0);
+    return 0;
   case 'p':
-    n = getInt(self);
+    n = SYNC(&input, getInt, 0);
     print("Key: %d\n", n);
     for (int i = 0; i < 32; ++i) {
       print("%d ", getPeriod(n + MELODY[i]));
     }
     print("\n");
-    break;
+    return 0;
   default:
-    self->buf[self->bufIndex++] = (char)c;
-    break;
+    ASYNC(&input, appendBuffer, c);
+    return 0;
   }
-}
-
-int getInt(App *self) {
-  self->buf[self->bufIndex] = '\0';
-  self->bufIndex = 0;
-  return atoi(self->buf);
-}
-
-int getHistorySum(App *self) {
-  int sum = 0;
-  for (int i = 0; i < self->historyIndex; ++i) {
-    sum += self->history[i];
-  }
-  return sum;
-}
-
-int compareInt(const void *a, const void *b) { return (*(int *)a - *(int *)b); }
-
-int getHistoryMedian(App *self) {
-  int tmp[3] = {self->history[0], self->history[1], self->history[2]};
-  qsort(tmp, self->historyIndex, sizeof(int), compareInt);
-  return self->history[self->historyIndex / 2];
 }
