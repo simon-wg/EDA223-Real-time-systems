@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Background.h"
 #include "Input.h"
 #include "Music.h"
 #include "TinyTimber.h"
@@ -7,8 +8,9 @@
 #include "sciTinyTimber.h"
 
 extern App app;
+extern Background background;
 extern Input input;
-extern MusicPlayer musicPlayer;
+extern Music music;
 extern Can can0;
 extern Serial sci0;
 
@@ -31,8 +33,8 @@ int startApp(App *self, int arg) {
   CAN_INIT(&can0);
   SCI_INIT(&sci0);
 
-  ASYNC(&musicPlayer, play, 500);
-  // SCI_WRITE(&sci0, "Hello, hello...\n");
+  ASYNC(&music, play, 931);
+  ASYNC(&background, loop, NULL);
 
   // msg.msgId = 1;
   // msg.nodeId = 1;
@@ -44,13 +46,14 @@ int startApp(App *self, int arg) {
   // msg.buff[4] = 'o';
   // msg.buff[5] = 0;
   // CAN_SEND(&can0, &msg);
+  print("Hello world!\n");
   return 0;
 }
 
 int main() {
   INSTALL(&sci0, sci_interrupt, SCI_IRQ0);
   INSTALL(&can0, can_interrupt, CAN_IRQ0);
-  TINYTIMBER(&app, startApp, 0);
+  TINYTIMBER(&app, startApp, NULL);
   return 0;
 }
 
@@ -59,18 +62,37 @@ int handleSerial(App *self, int c) {
   print("Rcv: '%c'\n", c);
   switch (c) {
   case 'F':
-    ASYNC(&input, clear, 0);
+    ASYNC(&input, clear, NULL);
     return 0;
   case 'e':
-    ASYNC(&input, appendInt, 0);
+    ASYNC(&input, appendInt, NULL);
     return 0;
   case 'p':
-    n = SYNC(&input, getInt, 0);
+    n = SYNC(&input, getInt, NULL);
     print("Key: %d\n", n);
     for (int i = 0; i < 32; ++i) {
       print("%d ", getPeriod(n + MELODY[i]));
     }
     print("\n");
+    return 0;
+  case 'm':
+    ASYNC(&music, toggleMute, NULL);
+    return 0;
+  case 'k':
+    ASYNC(&music, increaseVolume, NULL);
+    return 0;
+  case 'j':
+    ASYNC(&music, decreaseVolume, NULL);
+    return 0;
+  case 'i':
+    ASYNC(&background, increaseLoad, NULL);
+    return 0;
+  case 'u':
+    ASYNC(&background, decreaseLoad, NULL);
+    return 0;
+  case 'd':
+    ASYNC(&background, toggleBackgroundDeadline, NULL);
+    ASYNC(&music, toggleMusicDeadline, NULL);
     return 0;
   default:
     ASYNC(&input, appendBuffer, c);

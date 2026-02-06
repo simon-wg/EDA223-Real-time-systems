@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Background.h"
 #include "Input.h"
 #include "Music.h"
 #include "canTinyTimber.h"
@@ -7,7 +8,8 @@
 #define UNUSED 0
 
 App app = initApp();
+Background background = initBackground();
 Input input = initInput();
-MusicPlayer musicPlayer = initMusicPlayer(5);
+Music music = initMusic(5);
 Can can0 = initCan(CAN_PORT0, &app, receiver);
 Serial sci0 = initSerial(SCI_PORT0, &app, reader);

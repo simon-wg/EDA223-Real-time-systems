@@ -3,17 +3,26 @@
 
 #include "TinyTimber.h"
 
+#define MAX_VOLUME 8
+#define MIN_VOLUME 1
+
 extern const int MELODY[32];
 extern const int PERIOD[];
 
 typedef struct {
   Object super;
   unsigned char volume;
-} MusicPlayer;
+  unsigned char muted;
+  unsigned char deadlineEnabled;
+} Music;
 
-#define initMusicPlayer(v) {initObject(), v};
+#define initMusic(v) {initObject(), v, 0, 1};
 
 int getPeriod(int);
-int play(MusicPlayer *, int);
+int toggleMute(Music *, int);
+int toggleMusicDeadline(Music *, int);
+int increaseVolume(Music *, int);
+int decreaseVolume(Music *, int);
+int play(Music *, int);
 
 #endif

@@ -6,11 +6,11 @@
 
 extern Serial sci0;
 
-void print(char *format, ...) {
+void print(const char *format, ...) {
   char buffer[BUFFER_SIZE];
   va_list argp;
   va_start(argp, format);
-  vsnprintf(buffer, BUFFER_SIZE, format, argp);
+  int overflow = vsnprintf(buffer, BUFFER_SIZE, format, argp);
   va_end(argp);
   SCI_WRITE(&sci0, buffer);
 }

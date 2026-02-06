@@ -1,21 +1,12 @@
-3.a) 2500us
+2.a) The tone became gradually more distorted, the pitch seems to remain the same.
+500 USEC
 
-3.b) 500us
+2.b) The tone became distorted in a weird way, almost like it changed more than becoming distorted or changing pitch. After 9000 load the tone is gone. The period of this frequency is half of the period of the background load, which might impact?
+650 USEC
 
-4.a) 1136us
+2.c) The tone becomes distorted, and some harmnically frequent sound appears, becoming more frequent with more load.
+931 USEC
 
-4.b) $440 \times 2^\frac{k}{12}$
+3.b) The tone seems unaffected.
 
-4.c.a) 1703us
-
-4.c.b) 676us
-
-4.e) -5, 9
-
-5.a) -5, -3, -1, -5, -5, -3, -1, -5, -1, 0
-
-5.b) -10, 14
-
-5.c)
-
-5.d) $x(k) = k + 10$
+3.c) Around 13500 there is a significant pitch
