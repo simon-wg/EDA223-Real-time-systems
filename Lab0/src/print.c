@@ -6,11 +6,11 @@
 
 extern Serial sci0;
 
-void print(char *format, ...) {
+void print(char *fmt, ...) {
   char buffer[BUFFER_SIZE];
-  va_list argp;
-  va_start(argp, format);
-  vsnprintf(buffer, BUFFER_SIZE, format, argp);
-  va_end(argp);
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(buffer, BUFFER_SIZE, fmt, ap);
+  va_end(ap);
   SCI_WRITE(&sci0, buffer);
 }

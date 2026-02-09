@@ -64,6 +64,7 @@ int play(Music *self, int period) {
 #define MEASUREMENT_RUNS 5000
 
 int playMusic(Music *self){
+  Time start = CURRENT_OFFSET();
   if (self->deadlineEnabled) {
   } else {
   }
@@ -75,17 +76,14 @@ int playMusic(Music *self){
   } else {
     WRITE_REG(DAC->DHR8R2, 0);
   }
-  return 0;
+  return CURRENT_OFFSET() - start;
 }
 
 int measurePlayMusic(Music *self, int unused) {
   Time totalTime = 0;
   Time maxTime = 0;
   for (int i = 0; i < MEASUREMENT_RUNS; i++) {
-    Time start = CURRENT_OFFSET();
-    playMusic(self);
-    Time end = CURRENT_OFFSET();
-    Time time = end - start;
+    Time time = playMusic(self);
     totalTime += time;
     if (time > maxTime) {
       maxTime = time;

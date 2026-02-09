@@ -33,9 +33,9 @@ int startApp(App *self, int arg) {
   CAN_INIT(&can0);
   SCI_INIT(&sci0);
 
-  ASYNC(&music, play, 500);
-  ASYNC(&background, loop, 1000);
-  // ASYNC(&background, measureBackgroundLoop, NULL);
+  // ASYNC(&music, play, 500);
+  // ASYNC(&background, loop, 1000);
+  ASYNC(&background, measureBackgroundLoop, NULL);
   // ASYNC(&music, measurePlayMusic, NULL);
 
   // msg.msgId = 1;

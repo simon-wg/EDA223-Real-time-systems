@@ -34,22 +34,18 @@ int decreaseLoad(Background *self, int unused) {
 }
 
 // BELOW THIS IS ONLY FOR MEASUREMENT PURPOSES
-Timer timer = initTimer();
-
 int backgroundLoop(int range) {
+  Time start = CURRENT_OFFSET();
   for (int i = 0; i < range; i++) {
   };
-  return 0;
+  return CURRENT_OFFSET() - start;
 }
 
 int measureBackgroundLoop(Background *self, int unused) {
   Time totalTime = 0;
   Time maxTime = 0;
   for (int i = 0; i < 500; i++) {
-    Time start = CURRENT_OFFSET();
-    backgroundLoop(14000);
-    Time end = CURRENT_OFFSET();
-    Time time = end - start;
+    Time time = backgroundLoop(14000);
     totalTime += time;
     if (time > maxTime) {
       maxTime = time;
