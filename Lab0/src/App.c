@@ -1,11 +1,11 @@
 #include "App.h"
 #include "TinyTimber.h"
 #include "canTinyTimber.h"
-#include "sciTinyTimber.h"
-#include "print.h"
 #include "music.h"
-#include <sys/param.h>
+#include "print.h"
+#include "sciTinyTimber.h"
 #include <stdlib.h>
+#include <sys/param.h>
 
 extern App app;
 extern Can can0;
@@ -51,56 +51,58 @@ int main() {
   return 0;
 }
 
-void handleSerial(App *self, int c){
+void handleSerial(App *self, int c) {
   int n;
-  switch (c){
-    case 'F':
-      self->bufIndex = 0;
-      self->historyIndex = 0;
-      print("History and buffer cleared.\n");
-      break;
-    case 'e':
-      n = getInt(self);
-      self->history[2] = self->history[1];
-      self->history[1] = self->history[0];
-      self->history[0] = n;
-      self->historyIndex = MIN(self->historyIndex + 1, 3);
-      print("Entered integer %d: sum = %d, median = %d\n", self->history[0], getHistorySum(self), getHistoryMedian(self));
-      break;
-    case 'p':
-      n = getInt(self);
-      print("Key: %d\n", n);
-      for(int i = 0; i < 32; ++i){
-        print("%d ", getPeriod(n + MELODY[i]));
-      }
-      print("\n");
-      break;
-    default:
-      self->buf[self->bufIndex++] = (char) c;
-      break;
+  switch (c) {
+  case 'F':
+    self->bufIndex = 0;
+    self->historyIndex = 0;
+    print("History and buffer cleared.\n");
+    break;
+  case 'e':
+    n = getInt(self);
+    self->history[2] = self->history[1];
+    self->history[1] = self->history[0];
+    self->history[0] = n;
+    self->historyIndex = MIN(self->historyIndex + 1, 3);
+    print("Entered integer %d: sum = %d, median = %d\n", self->history[0],
+          getHistorySum(self), getHistoryMedian(self));
+    break;
+  case 'p':
+    n = getInt(self);
+    print("Key: %d\n", n);
+    for (int i = 0; i < 32; ++i) {
+      print("%d ", getPeriod(n + MELODY[i]));
+    }
+    print("\n");
+    break;
+  default:
+    self->buf[self->bufIndex++] = (char)c;
+    break;
   }
 }
 
-int getInt(App *self){
+int getInt(App *self) {
   self->buf[self->bufIndex] = '\0';
   self->bufIndex = 0;
   return atoi(self->buf);
 }
 
-int getHistorySum(App *self){
+int getHistorySum(App *self) {
   int sum = 0;
-  for (int i = 0; i < self->historyIndex; ++i){
+  for (int i = 0; i < self->historyIndex; ++i) {
     sum += self->history[i];
   }
   return sum;
 }
 
-int compareInt(const void *a, const void *b){
-  return (*(int *)a - *(int *)b);
-}
+int compareInt(const void *a, const void *b) { return (*(int *)a - *(int *)b); }
 
-int getHistoryMedian(App *self){
+int getHistoryMedian(App *self) {
   int tmp[3] = {self->history[0], self->history[1], self->history[2]};
   qsort(tmp, self->historyIndex, sizeof(int), compareInt);
-  return self->history[self->historyIndex / 2];
+  if (self->historyIndex == 2) {
+    return (tmp[0] + tmp[1]) / 2;
+  }
+  return tmp[self->historyIndex / 2];
 }
