@@ -65,5 +65,8 @@ int compareInt(const void *a, const void *b) { return (*(int *)a - *(int *)b); }
 int getHistoryMedian(Input *self, int unused) {
   int tmp[3] = {self->history[0], self->history[1], self->history[2]};
   qsort(tmp, self->historyIndex, sizeof(int), compareInt);
+  if (self->historyIndex == 2) {
+    return (tmp[0] + tmp[1]) / 2;
+  }
   return tmp[self->historyIndex / 2];
 }
