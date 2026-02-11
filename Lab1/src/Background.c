@@ -4,13 +4,13 @@
 #define LOAD_INCREMENT 500
 #define BACKGROUND_PERIOD USEC(1300)
 
-int loop(Background *self, int range) {
+int loop(Background *self, int unused) {
   if (self->deadlineEnabled) {
     SEND(BACKGROUND_PERIOD, BACKGROUND_PERIOD, self, loop, 0);
   } else {
     AFTER(BACKGROUND_PERIOD, self, loop, 0);
   }
-  for (int i = 0; i < range; i++) {
+  for (int i = 0; i < self->background_loop_range; i++) {
   };
   return 0;
 }
@@ -45,13 +45,13 @@ int measureBackgroundLoop(Background *self, int unused) {
   Time totalTime = 0;
   Time maxTime = 0;
   for (int i = 0; i < 500; i++) {
-    Time time = backgroundLoop(14000);
+    Time time = backgroundLoop(1000);
     totalTime += time;
     if (time > maxTime) {
       maxTime = time;
     }
   };
-  print("Background avg measurement: %d us\n", USEC(totalTime) / 500);
-  print("Background max measurement: %d us\n", USEC(maxTime));
+  print("Background avg measurement: %d us\n", USEC_OF(totalTime) / 500);
+  print("Background max measurement: %d us\n", USEC_OF(maxTime));
   return 0;
 }

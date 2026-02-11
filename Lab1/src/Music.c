@@ -65,6 +65,7 @@ int play(Music *self, int period) {
 
 int playMusic(Music *self){
   Time start = CURRENT_OFFSET();
+  for (int i = 0; i < 500; i++) {
   if (self->deadlineEnabled) {
   } else {
   }
@@ -75,6 +76,7 @@ int playMusic(Music *self){
     WRITE_REG(DAC->DHR8R2, self->volume);
   } else {
     WRITE_REG(DAC->DHR8R2, 0);
+  }
   }
   return CURRENT_OFFSET() - start;
 }
@@ -89,8 +91,8 @@ int measurePlayMusic(Music *self, int unused) {
       maxTime = time;
     }
   };
-  print("Background avg measurement: %d us\n", USEC(totalTime) / MEASUREMENT_RUNS);
-  print("Background tot measurement: %d us\n", USEC(totalTime));
-  print("Background max measurement: %d us\n", USEC(maxTime));
+  print("Background avg measurement: %d / 500 us\n", USEC_OF(totalTime) / MEASUREMENT_RUNS);
+  print("Background tot measurement: %d / 500 us\n", USEC_OF(totalTime));
+  print("Background max measurement: %d / 500 us\n", USEC_OF(maxTime));
   return 0;
 }
