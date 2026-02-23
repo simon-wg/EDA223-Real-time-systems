@@ -56,9 +56,28 @@ int main() {
 }
 
 int handleSerial(App *self, int c) {
+  if (c == 'c'){
+    self->conductor = !self->conductor;
+    print("Conductor mode: %s\n", self->conductor ? "ON" : "OFF");
+    return 0;
+  }
+  if (!self->conductor) {
+    return 0;
+  }
+  print("Rcv: '%c'\n", c);
+  ASYNC(self, sendCan, c);
+  ASYNC(self, handleKey, c);
+}
+
+int handleCan(App *self, int c) {
+  print("Handling CAN msg: '%c'\n", c);
+  ASYNC(self, handleKey, c);
+  return 0;
+}
+
+int handleKey(App *self, int c) {
   int n;
   uint8_t volume;
-  print("Rcv: '%c'\n", c);
   switch (c) {
   case 'F':
     ASYNC(self, clearBuffer, 0);
@@ -86,6 +105,16 @@ int handleSerial(App *self, int c) {
     ASYNC(self, appendBuffer, c);
     return 0;
   }
+}
+
+int sendCan(App *self, int c) {
+  CANMsg msg;
+  msg.msgId = 1;
+  msg.nodeId = 1;
+  msg.length = 1;
+  msg.buff[0] = c;
+  CAN_SEND(&can0, &msg);
+  return 0;
 }
 
 int clearBuffer(App *self, int unused) {
