@@ -10,16 +10,16 @@ typedef struct {
   char buf[INPUT_BUFFER_SIZE];
   unsigned char index;
   unsigned char conductor;
+  unsigned char playing;
 } App;
 
-#define initApp() {initObject(), {0}, 0, 1}
+#define initApp() {initObject(), {0}, 0, 1, 0}
 
 int reader(App *, int);
 int receiver(App *, int);
 int startApp(App *, int);
 int handleSerial(App *, int);
 int handleCan(App *, int);
-int handleKey(App *, int);
 int sendCan(App *, int);
 int clearBuffer(App *, int);
 int appendBuffer(App *, int);

@@ -4,7 +4,7 @@
 #include "TinyTimber.h"
 #include <stdint.h>
 
-#define MAX_VOLUME 12
+#define MAX_VOLUME 20
 #define MIN_VOLUME 0
 
 //START TONE GENERATOR CLASS
