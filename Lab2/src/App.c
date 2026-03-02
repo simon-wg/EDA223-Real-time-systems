@@ -19,9 +19,12 @@ extern SysIO sio0;
 int receiver(App *self, int unused) {
   CANMsg msg;
   CAN_RECEIVE(&can0, &msg);
+  print("Rcv(CAN): '%s'\n", msg.buff);
+  if (self->conductor) {
+    return 0;
+  }
   self->index = msg.length - 1;
   memcpy(self->buf, msg.buff, self->index);
-  print("Rcv(CAN): '%s'\n", msg.buff);
   ASYNC(self, handleCan, msg.buff[msg.length - 1]);
   return 0;
 }
@@ -35,6 +38,7 @@ int startApp(App *self, int arg) {
   CAN_INIT(&can0);
   SCI_INIT(&sci0);
   SIO_INIT(&sio0);
+  ASYNC(&musicPlayer, toggleLight, NULL);
   print("Hello world!\n");
   return 0;
 }
@@ -70,6 +74,9 @@ int handleCan(App *self, int c) {
     n = getInt(self);
     ASYNC(&musicPlayer, setKey, n);
     return 0;
+  case 'p':
+    ASYNC(&musicPlayer, togglePlay, NULL);
+    return 0;
   }
   return 0;
 }
@@ -81,9 +88,6 @@ int handleSerial(App *self, int c) {
     print("Conductor mode: %s\n", self->conductor ? "ON" : "OFF");
     return 0;
   }
-  if (!self->conductor) {
-    return 0;
-  }
   int n;
   uint8_t volume;
   switch (c) {
@@ -91,37 +95,38 @@ int handleSerial(App *self, int c) {
     ASYNC(self, clearBuffer, 0);
     return 0;
   case 'm':
+    sendCan(self, c);
     if (self->conductor)
-      sendCan(self, c);
-    ASYNC(&toneGenerator, toggleMute, NULL);
+      ASYNC(&toneGenerator, toggleMute, NULL);
     return 0;
   case 'i':
-    if (self->conductor)
-      sendCan(self, c);
+    sendCan(self, c);
     volume = SYNC(&toneGenerator, getVolume, NULL);
-    ASYNC(&toneGenerator, setVolume, volume + 1);
+    if (self->conductor)
+      ASYNC(&toneGenerator, setVolume, volume + 1);
     return 0;
   case 'u':
-    if (self->conductor)
-      sendCan(self, c);
+    sendCan(self, c);
     volume = SYNC(&toneGenerator, getVolume, NULL);
-    ASYNC(&toneGenerator, setVolume, volume - 1);
+    if (self->conductor)
+      ASYNC(&toneGenerator, setVolume, volume - 1);
     return 0;
   case 't':
-    if (self->conductor)
-      sendCan(self, c);
+    sendCan(self, c);
     n = getInt(self);
-    ASYNC(&musicPlayer, setTempo, n);
+    if (self->conductor)
+      ASYNC(&musicPlayer, setTempo, n);
     return 0;
   case 'k':
-    if (self->conductor)
-      sendCan(self, c);
+    sendCan(self, c);
     n = getInt(self);
-    ASYNC(&musicPlayer, setKey, n);
+    if (self->conductor)
+      ASYNC(&musicPlayer, setKey, n);
     return 0;
   case 'p':
-    ASYNC(&musicPlayer, togglePlay, NULL);
-    ASYNC(&musicPlayer, toggleLight, NULL);
+    sendCan(self, c);
+    if (self->conductor)
+      ASYNC(&musicPlayer, togglePlay, NULL);
     return 0;
   default:
     ASYNC(self, appendBuffer, c);
@@ -130,7 +135,6 @@ int handleSerial(App *self, int c) {
 }
 
 int sendCan(App *self, int c) {
-  return 0; // TO DISABLE CAN
   CANMsg msg;
   msg.msgId = 1;
   msg.nodeId = 1;

@@ -36,7 +36,7 @@ int playTone(MusicPlayer *self, int melodyIndex) {
     AFTER(USEC(toggleInterval * i), self, toggleLight, NULL);
   }
 
-  SEND(USEC(nextNote) - MSEC(100), MSEC(50), &toneGenerator, stopTone,
+  SEND(USEC(nextNote) - MSEC(50), MSEC(50), &toneGenerator, stopTone,
        NULL); // Schedule stopTone
   SEND(USEC(nextNote), USEC(50), self, playTone,
        (melodyIndex + 1) % 32); // Schedule next note

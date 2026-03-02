@@ -33,10 +33,8 @@ int buttonRelease(Button *self, int UNUSED) {
   if (self->mode < 1) {
     ABORT(self->pahTask);
   }
-  if (self->mode == 0) {
-    print("Button released after %dms\n",
-          timeSinceLast / 100); // 100 ticks per ms
-  }
+  print("Button released after %dms\n",
+        timeSinceLast / 100); // 100 ticks per ms
   self->mode = 0;
   SIO_TRIG(&sio0, 0);
   sio0.meth = (Method)buttonPress;
@@ -58,10 +56,10 @@ int resetTempo(Button *self, int UNUSED) {
 
 int appendPress(Button *self, int press) {
   self->presses[self->pressIndex] = press;
-  self->pressIndex = (self->pressIndex + 1) % 4;
+  self->pressIndex = (self->pressIndex + 1) % 3;
   unsigned char valid = 1;
-  for (int i = 0; i < 4; i++) {
-    for (int j = i + 1; j < 4; j++) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = i + 1; j < 3; j++) {
       if (abs(self->presses[i] - self->presses[j]) > 100) {
         valid = 0;
         break;
